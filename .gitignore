@@ -1,0 +1,11 @@
+# State files written by the skill at runtime — never committed
+.buildproven-build/
+
+# Editor / OS noise
+.DS_Store
+*.swp
+.vscode/
+.idea/
+
+# Local notes
+NOTES.local.md
