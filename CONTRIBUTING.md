@@ -10,7 +10,11 @@ Before you PR a new `lessons/<track>/NN-<name>.md`, the lesson must pass these:
 2. **Ships a public URL.** Every lesson must end with a deployed, real artifact, not a localhost demo.
 3. **Stays inside the time box.** Teen lessons ≤ 20 min. Pro lessons ≤ 60 min. If yours runs over for the test user, cut a step.
 4. **Names the failure modes.** Include a "Stuck-flow notes" section at the bottom with the 3–5 most likely places this lesson breaks and how to recover.
-5. **No AI tells.** Run the lesson markdown through `bs:deaify` (or a human pass) before opening the PR.
+5. **No AI tells.** Run the lesson markdown through the BuildProven 7-layer detector and clear **≥ 85/100** before opening the PR:
+   ```bash
+   python ~/Projects/internal/buildproven/scripts/de_ai.py lessons/<track>/NN-name.md
+   ```
+   Common flags: em-dash overuse (replace some with periods), rule-of-three count >4/1000w (use 2- and 4-item lists), low burstiness (vary sentence length deliberately). The full pattern guide is in `commands/bs/deaify.md` of the claude-setup repo.
 6. **Frontmatter complete:** `id`, `title`, `track`, `duration_minutes`, `produces`, `builds_on`, `enables`, `artifact_filename`.
 
 ## Lesson markdown shape
