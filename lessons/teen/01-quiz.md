@@ -11,9 +11,7 @@ artifact_filename: quiz.html
 
 # What we're building
 
-A quiz about **{favourite_thing}**. Five questions. You pick the questions. The AI writes the code. At the end you get a real link you can send to a friend, and they can play it on their phone.
-
-Here's what one looks like when it's done: [example image — a clean quiz page with one question + four buttons].
+A quiz about **{favourite_thing}**. Five questions. You pick the topic. The AI writes the code. At the end you get a real link you can send to a friend, and they can play it on their phone.
 
 ## Why this matters
 
@@ -21,11 +19,11 @@ By the end of this lesson you'll have done something most adults haven't: you dr
 
 ---
 
-# Step 1 — Make the quiz file
+# Step 1 — Tell the AI to make the quiz
 
-We're going to ask the AI to make a webpage with a quiz. You're the boss. The AI is the builder.
+You're the boss. The AI is the builder. To make it build, you **send it the exact instructions** for what to make.
 
-**Paste this prompt** into the chat (right where you're reading this), exactly as written, and press send:
+**Send this as your next message** — copy it, paste it into the chat, and hit enter:
 
 ```
 Create a single-page HTML quiz file called quiz.html in the current directory.
@@ -37,16 +35,14 @@ Style: clean, mobile-friendly, dark background with one bright accent color of y
 For each question:
 - Show one question at a time
 - 4 multiple-choice answers as buttons
-- When the user clicks an answer, show if it was right or wrong
+- When I click an answer, show if it was right or wrong
 - Then a "Next" button to go to the next question
-- At the end, show their score out of 5 with a fun comment
+- At the end, show my score out of 5 with a fun comment
 
-Don't ask me anything else — pick reasonable questions about {favourite_thing} and just build it. Use only HTML, CSS, and JavaScript in one file. No external libraries.
+Pick reasonable questions about {favourite_thing} and just build it. Use only HTML, CSS, and JavaScript in one file. No external libraries.
 ```
 
-Wait for the AI to finish. It should create a file called `quiz.html` in your folder.
-
-**When it's done, come back here.**
+The AI will write the file in your folder. When it's done, it'll say so.
 
 ---
 
@@ -60,13 +56,13 @@ Wait for the AI to finish. It should create a file called `quiz.html` in your fo
 
 # Step 2 — Open it and try it
 
-Run this in your terminal (or just say "open quiz.html" to me and I'll do it):
+Tell the AI:
 
 ```
-open quiz.html
+Open quiz.html in my browser
 ```
 
-Your browser should open with the quiz. Try answering all 5 questions.
+Your browser should pop open with the quiz. Try answering all 5 questions.
 
 **Two things I want you to notice:**
 
@@ -89,13 +85,13 @@ Pick one of these to ask for, or invent your own:
 - *"After the score, show a different comment for 5/5, 3-4/5, and 0-2/5"*
 - *"Make the right answer flash green and the wrong answer flash red for half a second"*
 
-**Paste your change request** like this:
+**Send your change request** like this:
 
 ```
 Update quiz.html: [your change here]. Don't change anything else.
 ```
 
-When the AI is done, run `open quiz.html` again and check it.
+When the AI is done, tell it: `Open quiz.html again` to see the change.
 
 > Tell me: **looks good** or **something broke**.
 

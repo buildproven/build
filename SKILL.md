@@ -18,7 +18,7 @@ model: sonnet
 Before saying anything to the user, check these in parallel:
 
 1. **Claude Code is current** — we are inside Claude Code; this is implicit
-2. **`bs:here-now` skill is installed** — needed to deploy lesson artifacts. Check `~/.claude/skills/here-now/` exists. If not, tell the user: *"You need the `here-now` skill to publish what you build. Install it with `/plugin install here-now/here-now` and run /buildproven:build:start again."* and STOP.
+2. **`here-now` skill is installed** — needed to deploy lesson artifacts. Check `~/.claude/skills/here-now/SKILL.md` exists. If not, **don't block the lesson** — note it and continue. At the Ship-it step we'll fall back to local-only (open the file in browser) and tell the user how to install `here-now` for next time. The lesson is more important than the deploy.
 3. **Working directory is writeable** — `pwd` should be a regular project dir, not `~` or `/`. If it's not, ask the user to `cd` somewhere first (suggest `~/Projects/my-builds`).
 4. **State directory** — create `.buildproven-build/` in the current working directory if it doesn't exist.
 
@@ -33,6 +33,10 @@ Read `.buildproven-build/profile.json`. If it doesn't exist, ask the user these 
 3. **What's something you're a fan of, into, obsessed with, or genuinely curious about?** (a band, a sport, a game, a book, a topic at work — anything specific. This becomes the example in every lesson.)
 4. **Have you built anything with code before?** (yes / a little / no — used to set the explanation depth)
 
+Then ask one more — silently for OS detection (or detect via `uname` first; only ask if detection fails):
+
+5. **Are you on Mac, Windows, or Linux?** (only ask if `uname` doesn't tell us — used to pick the right "open file" command later)
+
 Save to `.buildproven-build/profile.json`:
 
 ```json
@@ -41,6 +45,7 @@ Save to `.buildproven-build/profile.json`:
   "age": 0,
   "favourite_thing": "...",
   "prior_coding": "yes|a-little|no",
+  "os": "mac|windows|linux",
   "created_at": "ISO8601"
 }
 ```
@@ -87,15 +92,20 @@ Read `.buildproven-build/progress.json`. If it doesn't exist, treat current less
 
 Read the lesson markdown for `current_lesson`. The lesson file is the script — follow it step by step. **Substitute** `{name}`, `{favourite_thing}`, `{prior_coding}` with the profile values as you read.
 
-## Step 4 — Run the lesson
+## Step 4 — Run the lesson (CRITICAL — read carefully)
 
-Each lesson has numbered steps. For each step:
+The user is in a single Claude Code session. **You are both the lesson driver and the agent that builds the thing.** There is no "second session" — when the lesson says "paste this prompt," it means the user's next message to *you* is that prompt, and *you* execute it (write the file, run the command, whatever).
 
-1. Read aloud (in chat) what we're doing in this step. One short sentence.
-2. Show the **exact prompt** to paste, in a code block. Tell them: *"Paste this into a new Claude Code session in this directory. Come back here when it's done."* (Or, if the lesson script says to run it inside this session, run it yourself.)
-3. When they come back, ask: *"Did it work? (yes / no / weird)"*
-4. **Yes** → record checkpoint, continue to next step.
-5. **Weird or no** → branch into the **Stuck flow** below. Do NOT try to fix the code yourself silently — make the debugging visible, because debugging is the lesson.
+For each lesson step:
+
+1. **Explain in one short sentence** what this step does. No preamble.
+2. **Show the exact prompt** in a code block. Say: *"Send this as your next message — exactly as written, no changes. I'll do the work."*
+3. The user pastes the prompt. You execute it (create the file, edit it, run the command — whatever the prompt says). **You are not a chatbot — you are an agent. Use Write/Edit/Bash tools.**
+4. After execution, **describe in plain language** what you did and where the file is. Then ask: *"Did it work? (yes / no / weird)"*
+5. **Yes** → record checkpoint to `progress.json`, continue to next step.
+6. **No or weird** → branch into the **Stuck flow** below.
+
+> **Why this design:** the user is learning to drive an agent. If they say "go build it for me," the lesson failed. The lesson works when the user is consciously sending each instruction — even though the agent on the other side is the same Claude Code session.
 
 After every successful step, append to `progress.json`:
 
@@ -108,11 +118,15 @@ After every successful step, append to `progress.json`:
 Every lesson ends with **deploying a real thing to a public URL.** When the lesson script reaches its "Ship it" step:
 
 1. Confirm the artifact file exists in the working directory (lesson tells you the filename).
-2. Invoke the `here-now` skill to publish it.
-3. Show the user the live URL. Say: *"Here's your link — send it to one person right now. I'll wait."*
-4. Save the URL to `progress.json` under `completed[].url`.
+2. **If `here-now` is installed:** invoke it to publish the file. Show the user the live URL. Say: *"Here's your link — send it to one person right now. I'll wait."*
+3. **If `here-now` is NOT installed:** open the file locally with the right command for the user's OS:
+   - macOS: `open <filename>`
+   - Windows: `start <filename>`
+   - Linux: `xdg-open <filename>`
 
-If `here-now` fails, fall back to: *"Open this file in your browser to see it work locally — `open ./<filename>`. I'll help you publish it next session."* — and record the artifact path so the next lesson can deploy it.
+   Then tell the user: *"Your file is open in the browser — that's it working. To put it on the internet so you can text the link to a friend, install the `here-now` skill (one time setup): `/plugin install here-now/here-now` — then come back and we'll publish it."* Record the artifact path in `progress.json` under `completed[].artifact_path` so a future session can deploy it.
+
+4. Save the URL (or local path) to `progress.json` under `completed[].url` or `completed[].artifact_path`.
 
 ## Step 6 — Lesson complete
 
@@ -162,9 +176,21 @@ After the last lesson is marked complete:
 
 ## State files (reference)
 
+Per-project state lives in the **current working directory**:
+
 - `.buildproven-build/profile.json` — created Step 1, never overwritten without confirmation
 - `.buildproven-build/progress.json` — append-only checkpoint log + current_lesson pointer
 - `.buildproven-build/artifacts/<lesson-id>/` — files produced by each lesson
 - `.buildproven-build/stuck.json` — append-only log of where users got stuck
+
+A **global pointer** lives at `~/.claude/data/buildproven-build/last-dir.txt` — just the absolute path of the most recent working directory. On startup, if the current `pwd` has no `.buildproven-build/` but the pointer file exists and points to a valid directory, ask the user: *"You started a build in `<that-dir>`. Continue there, or start fresh here?"*
+
+## Cross-platform notes
+
+- **`open <file>`** is macOS only. Use:
+  - macOS: `open <file>`
+  - Windows: `start <file>`
+  - Linux: `xdg-open <file>`
+- Detect OS via `uname` (or in Bash, `$OSTYPE`). When in doubt, ask the user: *"Are you on a Mac, Windows, or Linux?"* once during pre-flight and save it to `profile.json` as `os`.
 
 That's the orchestrator. The lesson markdowns do the actual teaching.
