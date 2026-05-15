@@ -86,11 +86,30 @@ Read `.buildproven-build/progress.json`. If it doesn't exist, treat current less
 | teen | 4 | `teen-04-share` | `lessons/teen/04-share.md` |
 | teen | 5 | `teen-05-iterate` | `lessons/teen/05-iterate.md` |
 | pro | 1 | `pro-01-meeting-prep` | `lessons/pro/01-meeting-prep.md` |
-| pro | 2 | `pro-02-automate` | `lessons/pro/02-automate.md` |
-| pro | 3 | `pro-03-tool` | `lessons/pro/03-tool.md` |
+| pro | 2 | `pro-02-feature` | `lessons/pro/02-feature.md` |
+| pro | 3 | `pro-03-build` | `lessons/pro/03-build.md` |
 | pro | 4 | `pro-04-ship` | `lessons/pro/04-ship.md` |
 
 Read the lesson markdown for `current_lesson`. The lesson file is the script. Follow it step by step. **Substitute** `{name}`, `{favourite_thing}`, `{prior_coding}` with the profile values as you read.
+
+## Step 3.5. Starting artifact (debug-first lessons only)
+
+Some lessons (mostly pro track) start by handing the user a **broken artifact** they need to drive the agent to fix. The lesson frontmatter declares it:
+
+```yaml
+mode: debug-first
+start_artifact_url: https://raw.githubusercontent.com/buildproven/build/main/lessons/pro/artifacts/01-meeting-prep/index.html
+start_artifact_filename: index.html
+start_demo_url: https://kindly-oyster-2e27.here.now/
+```
+
+When `mode: debug-first` is set, before running Step 4:
+
+1. **Show the user the live broken thing first.** Say: *"Open this in your browser: `<start_demo_url>`. Try it. Tell me what's broken."* Wait for them to interact and notice at least one bug. This is the hook — don't skip it.
+2. **Then download the source** to their working directory. Use `curl -fsSL "<start_artifact_url>" -o "<start_artifact_filename>"` (or fetch in browser). Confirm the file is there.
+3. **Now hand control to the lesson** for Step 4 onward. The user will drive the agent to fix the bugs they noticed, then redeploy.
+
+For build-first lessons (no `mode` or `mode: build-first`, the default), skip this step entirely.
 
 ## Step 4. Run the lesson (CRITICAL, read carefully)
 
