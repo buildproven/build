@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Meeting Prep Tool</title>
+<style>
+  :root { color-scheme: light; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    max-width: 720px;
+    margin: 2rem auto;
+    padding: 0 1.25rem;
+    color: #1f2937;
+    line-height: 1.55;
+  }
+  h1 { font-size: 1.75rem; margin-bottom: 0.25rem; }
+  p.tagline { color: #6b7280; margin-top: 0; }
+  label { display: block; font-weight: 600; margin: 1rem 0 0.35rem; font-size: 0.95rem; }
+  input, textarea {
+    width: 100%;
+    padding: 0.65rem 0.8rem;
+    font-size: 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+  textarea { min-height: 80px; resize: vertical; }
+  button {
+    margin-top: 1.25rem;
+    padding: 0.7rem 1.4rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background: #2563eb;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  button:hover { background: #1d4ed8; }
+  #brief {
+    margin-top: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background: #f9fafb;
+    border-left: 3px solid #2563eb;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    display: none;
+  }
+  #brief.visible { display: block; }
+  #brief h2 { margin-top: 0; font-size: 1.1rem; }
+  .footer { margin-top: 2rem; color: #9ca3af; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+
+<h1>Meeting Prep</h1>
+<p class="tagline">Turn three inputs into a structured prep brief.</p>
+
+<label for="topic">Meeting topic</label>
+<input id="topic" type="text" placeholder="Q3 budget review" />
+
+<label for="attendees">Attendees (comma-separated)</label>
+<input id="attendees" type="text" placeholder="Sarah (CFO), Marcus (Eng Director), Priya (PM)" />
+
+<label for="outcome">Desired outcome</label>
+<textarea id="outcome" placeholder="Approval on the headcount plan for Q3"></textarea>
+
+<button onclick="generateBrief()">Generate prep brief</button>
+
+<div id="brief"></div>
+
+<p class="footer">v0.1 — buildproven/build pro lesson 1 starter artifact.</p>
+
+<script>
+function generateBrief() {
+  const topic = document.getElementById('topic').value.trim();
+  const attendees = document.getElementById('attendees').value.trim();
+  const outcome = document.getElementById('outcome').value.trim();
+
+  // BUG 1: This regex strips quotes, apostrophes, ampersands, etc.
+  // A topic like "Q3 OKRs & roadmap" becomes "Q3 OKRs  roadmap" (and any
+  // entry with an apostrophe like "client's renewal" silently loses it).
+  // Worse: a topic that's ONLY special chars (e.g. "&&&") becomes empty
+  // and the brief renders without a topic at all.
+  const safeTopic = topic.replace(/[^a-zA-Z0-9 ]/g, '');
+
+  // BUG 2: The attendees variable is read but never used in the output.
+  // The brief generates "key questions" generically instead of tailored
+  // to who's actually in the room.
+  const brief = `# Prep brief for: ${safeTopic}
+
+## Desired outcome
+${outcome || '(not specified)'}
+
+## Three key questions to drive the meeting
+1. What does success look like in concrete terms?
+2. What's the biggest risk if we don't decide today?
+3. What information would change the recommendation?
+
+## The one thing not to forget
+Restate the desired outcome at the top of the meeting. People drift.
+
+## Suggested agenda (15 min)
+- 2 min: Restate outcome
+- 6 min: Present the recommendation
+- 5 min: Open discussion
+- 2 min: Confirm decision and owner`;
+
+  const out = document.getElementById('brief');
+  out.textContent = brief;
+  out.classList.add('visible');
+}
+</script>
+
+</body>
+</html>
